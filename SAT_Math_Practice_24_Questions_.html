@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head><meta name="allchatbots-layout" content="large">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAT Math Practice (24 Questions)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #f4f6fb; color: #1d2433; line-height: 1.5; }
+  header { background: #1f3a68; color: #fff; padding: 20px 16px; position: sticky; top: 0; z-index: 5; }
+  header h1 { margin: 0 0 6px; font-size: 22px; }
+  .score-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 15px; }
+  .score-bar .pill { background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 999px; }
+  main { max-width: 820px; margin: 0 auto; padding: 16px; }
+  .card { background: #fff; border-radius: 12px; padding: 18px; margin: 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card h2 { font-size: 17px; margin: 0 0 10px; color: #1f3a68; }
+  .qtext { white-space: pre-line; margin: 0 0 12px; font-size: 16px; }
+  .choices { display: grid; gap: 8px; }
+  .choice { text-align: left; padding: 10px 12px; border: 1px solid #c9d2e3; border-radius: 8px; background: #fff; font-size: 15px; cursor: pointer; }
+  .choice:hover:not(:disabled) { background: #eef3fb; }
+  .choice.correct { background: #e3f6e8; border-color: #3aa35b; }
+  .choice.wrong { background: #fde8e8; border-color: #d64545; }
+  .choice:disabled { cursor: default; }
+  .answer-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input[type=text] { padding: 9px 12px; font-size: 16px; border: 1px solid #c9d2e3; border-radius: 8px; width: 180px; }
+  button.primary { padding: 9px 16px; font-size: 15px; background: #1f3a68; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+  button.primary:disabled { opacity: 0.5; cursor: default; }
+  button.secondary { padding: 8px 14px; font-size: 14px; background: #fff; border: 1px solid #1f3a68; color: #1f3a68; border-radius: 8px; cursor: pointer; }
+  .feedback { margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 15px; display: none; }
+  .feedback.ok { display: block; background: #e3f6e8; }
+  .feedback.bad { display: block; background: #fde8e8; }
+  .explain { margin-top: 8px; color: #333; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .final { text-align: center; }
+  .final .big { font-size: 40px; font-weight: 700; color: #1f3a68; margin: 8px 0; }
+  .hidden { display: none; }
+  @media (max-width: 480px) { .qtext { font-size: 15px; } input[type=text] { width: 100%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>SAT Math Practice: 24 Questions</h1>
+  <div class="score-bar">
+    <span class="pill" id="answered">Answered: 0 / 24</span>
+    <span class="pill" id="correct">Correct: 0</span>
+  </div>
+</header>
+<main>
+  <div id="list"></div>
+  <div class="card final hidden" id="final">
+    <h2>Your result</h2>
+    <div class="big" id="finalScore"></div>
+    <p id="finalMsg"></p>
+    <button class="primary" onclick="resetAll()">Start over</button>
+  </div>
+  <div class="controls">
+    <button class="secondary" onclick="resetAll()">Reset all answers</button>
+  </div>
+</main>
+
+<script>
+const QUESTIONS = [
+  { q: "f(x) = 7000(1.005)^(3x)\nThe given function f models the balance of a bank account, in dollars, x years after it's opened. Which statement is the best interpretation of (1.005)^(3x)?",
+    choices: ["Every 4 months, the balance increases by about $5.", "Every 3 years, the balance increases by about $5.", "At the end of every 4-month interval, the balance increases by about 0.5% of the balance at the beginning of the 4-month interval.", "At the end of every 3-year interval, the balance increases by about 0.5% of the balance at the beginning of the 2-year interval."],
+    answer: 2,
+    explanation: "A 4-month period is 1/3 of a year, so 3x goes up by 1 each 4 months. Each step multiplies the balance by 1.005, which is a 0.5% increase of the balance at the start of that period." },
+
+  { q: "In triangle RST, the measure of angle R is 50°, the measure of angle S is x°, and the measure of angle T is (4x − 5)°. Point L lies on RS, point K lies on ST, and LK is parallel to RT. What is the measure, in degrees, of angle SKL? (Disregard the degree symbol when entering your answer.)",
+    type: "num", answer: "103",
+    explanation: "The angles of a triangle add to 180°: 50 + x + (4x − 5) = 180, so 5x = 135 and x = 27. Angle T = 4(27) − 5 = 103°. Because LK ∥ RT, angle SKL is a corresponding angle to angle T, so it equals 103°." },
+
+  { q: "Data set A: 8, 11, 12, 15, 21, 27\nData set B: 9, 12, 13, 16, 22, h\nData sets A and B each consist of 6 values as shown, where h is a constant. If the standard deviation of data set A is greater than the standard deviation of data set B, which of the following could be the value of h?\nI. 23\nII. 28\nIII. 29",
+    choices: ["I only", "II only", "III only", "II or III"],
+    answer: 0,
+    explanation: "Both sets have 6 values, so compare the sums of squared deviations from the mean. Set A has 251.3. For set B with h = 23 it is about 158.8, which is smaller, so A's standard deviation is larger. With h = 28 the two are equal, and with h = 29 set B is larger. Only I works." },
+
+  { q: "A dance studio charges an introductory fee for the first 3 lessons and then charges a fixed fee for each additional lesson. One student took 6 lessons and was charged $150. Another student took 17 lessons and was charged $480. Which function f gives the total charge, in dollars, for any student who took x lessons, where x > 2?",
+    choices: ["f(x) = 25x", "f(x) = 25x + 55", "f(x) = 30x", "f(x) = 30x − 30"],
+    answer: 3,
+    explanation: "The fixed fee per lesson is the slope: (480 − 150) / (17 − 6) = 330 / 11 = 30. Then 150 = 30(6) + b, so b = −30. The function is f(x) = 30x − 30. Check: 30(17) − 30 = 480." },
+
+  { q: "In triangle ABC, the measure of angle B is 90° and BD is an altitude of the triangle. The length of AB is 24 and the length of AC is 13 greater than the length of AB. What is the value of BD/BC?",
+    choices: ["13/24", "24/37", "37/24", "24/13"],
+    answer: 1,
+    explanation: "AC = 24 + 13 = 37, the hypotenuse. Triangles ABD and ACB are similar (they share angle A and both have a right angle), so BD/BC = AB/AC = 24/37." },
+
+  { q: "Right rectangular prism X is similar to right rectangular prism Y. The surface area of right rectangular prism X is 56 cm², and the surface area of right rectangular prism Y is 896 cm². The volume of right rectangular prism Y is 1,536 cm³. What is the sum of the volumes, in cm³, of right rectangular prism X and right rectangular prism Y?",
+    type: "num", answer: "1560",
+    explanation: "The ratio of surface areas is 896/56 = 16, so the scale factor is 4 and the volume ratio is 4³ = 64. Volume of X = 1536/64 = 24. Sum = 24 + 1536 = 1560." },
+
+  { q: "The function f is defined by f(x) = (x² + ax + b)/(x + c), where a, b, and c are constants. The graph of f in the xy-plane does not intersect the line x = 4. If f(5) = f(6) = 0, what is the value of a + b + c?",
+    type: "num", answer: "15",
+    explanation: "The graph never meets x = 4, so x = 4 must be a vertical asymptote that cancels, which means x + c = x − 4 and c = −4. The numerator has zeros at 5 and 6, so x² + ax + b = (x − 5)(x − 6) = x² − 11x + 30. So a = −11 and b = 30. Then a + b + c = −11 + 30 − 4 = 15." },
+
+  { q: "To investigate the effect of magnesium supplementation on the sleep quality of adults, a researcher selected 190 adults at random from a community center. Each participant was then randomly assigned to take a magnesium supplement or a placebo each day for 6 weeks. The researcher found that the magnesium supplement caused statistically significant improved sleep quality. What feature of this study allowed the researcher to conclude that the magnesium supplement caused the improved sleep quality?",
+    choices: ["There were more than 100 participants in the study.", "The participants were selected at random from the community center.", "The sleep efficiency of each participant was measured again at the end of 6 weeks.", "Each participant was randomly assigned to take a magnesium supplement or a placebo."],
+    answer: 3,
+    explanation: "Random assignment to treatment and control groups balances other factors between the groups, so a difference in outcomes can be attributed to the supplement. Random selection (choice B) affects how well the results generalize, not whether causation can be concluded." },
+
+  { q: "In the xy-plane, circle F is defined by (x + 7)² + (y + 7)² = 36. Circle G has the same center as circle F, and the radius of circle G is 4 units greater than the radius of circle F. Circle G is defined by (x + 7)² + (y + 7)² = p, where p is a constant. What is the value of p?",
+    type: "num", answer: "100",
+    explanation: "The radius of F is √36 = 6. The radius of G is 6 + 4 = 10, so p = 10² = 100." },
+
+  { q: "The function h is defined by h(x) = −√(x² + bx + c), where b and c are constants. In the xy-plane, the graph of y = h(x) contains the points (2, 0) and (0, −√368). If h(m) = 0, what is the greatest possible value of m?",
+    type: "num", answer: "184",
+    explanation: "The point (0, −√368) gives c = 368. The point (2, 0) gives 4 + 2b + 368 = 0, so b = −186. Then h(m) = 0 means m² − 186m + 368 = 0. Its roots are 2 and 184 (they add to 186 and multiply to 368). The greatest value is 184." },
+
+  { q: "A square map has a side length of 30 inches, and 1 inch on the map represents an actual distance of 17 miles. A smaller version of the same map is printed as a square with side length 65% shorter than the side length of the previous map. On the smaller map, which of the following is closest to the actual distance, in miles, represented by 1 inch?",
+    choices: ["5.95", "10.30", "19.50", "48.57"],
+    answer: 3,
+    explanation: "The smaller side is 30 × (1 − 0.65) = 10.5 inches. The same actual side length, 30 × 17 = 510 miles, now fits in 10.5 inches, so 1 inch represents 510 / 10.5 ≈ 48.57 miles." },
+
+  { q: "The figure shows a rectangular pool surrounded by a concrete path that is x feet wide on all sides. The pool is 21 ft long and 13 ft wide. The area of the concrete path is 240 ft². What is the value of x?",
+    choices: ["3", "6", "20", "40"],
+    answer: 0,
+    explanation: "The outer rectangle is (21 + 2x)(13 + 2x). The path area is that minus the pool, 21 × 13 = 273: (21 + 2x)(13 + 2x) − 273 = 240. Expanding gives 4x² + 68x − 240 = 0, or x² + 17x − 60 = 0, so (x + 20)(x − 3) = 0 and x = 3." },
+
+  { q: "x(13x + 27) + c = 5. In the given equation, c is a constant. A solution to the equation is (−27 + √261)/26. What is the value of c?",
+    type: "num", answer: "14",
+    explanation: "Expand to 13x² + 27x + (c − 5) = 0. The quadratic formula gives x = (−27 ± √(729 − 52(c − 5)))/26. Matching √(729 − 52(c − 5)) = √261 gives 729 − 52(c − 5) = 261, so c − 5 = 9 and c = 14." },
+
+  { q: "x(r − 7) + 3 = −19x + 25. In the given equation, r is an integer. If the given equation has exactly one solution, what CANNOT be the value of r?",
+    type: "num", answer: "-12",
+    explanation: "Collect the x-terms: x(r − 7 + 19) = 22, so x(r + 12) = 22. If r + 12 = 0, the equation becomes 0 = 22, which has no solution. So r = −12 is the value that cannot be used." },
+
+  { q: "The table shows the distribution of people in a certain city by age group.\nLess than 18 years old: 34%\n18 – 40 years old: 23%\n41 – 65 years old: 22%\nGreater than 65 years old: 21%\nIf a person in this city is selected at random, which of the following is closest to the probability of selecting a person who is greater than 18 years old, given that the person is at most 65 years old?",
+    type: "num", answer: "45/79",
+    explanation: "Being at most 65 means under 18, 18–40, or 41–65: 34 + 23 + 22 = 79%. Being greater than 18 and at most 65 means 18–40 or 41–65: 23 + 22 = 45%. The conditional probability is 45/79 ≈ 0.57." },
+
+  { q: "For the right circular cone shown, B is a point on the circumference of the base, and the length of segment AB (not shown) is 92 cm. The height of the cone is 46 cm and the volume of the cone is kπ cm³. What is the value of k?",
+    type: "num", answer: "97336",
+    explanation: "AB is the slant height, 92 cm. The base radius is r = √(92² − 46²) = √6348 = 46√3. Volume = (1/3)π r² h = (1/3)π(6348)(46) = 2116 × 46 π = 97336π. So k = 97336." },
+
+  { q: "24x² − (12a + 2b)x + ab = 0. In the given equation, a and b are positive constants. The sum of the solutions is k(6a + b), where k is a constant, and the product of the solutions is nab, where n is a constant. What is the value of k + n?",
+    type: "num", answer: "0.125",
+    explanation: "For ax² + bx + c = 0, the sum of the roots is −b/a = (12a + 2b)/24 = (6a + b)/12, so k = 1/12. The product is c/a = ab/24, so n = 1/24. Then k + n = 2/24 + 1/24 = 3/24 = 1/8." },
+
+  { q: "The function f is defined by f(x) = a·b^x / n, where a, b, and n are constants, and b and n are integers. If f(3) = 6 and f(5) = 150, what is the value of f(6)?",
+    type: "num", answer: "750",
+    explanation: "Dividing the two equations: f(5)/f(3) = b² = 150/6 = 25, so b = 5 (taking b positive). Then f(6)/f(3) = b³ = 125, so f(6) = 6 × 125 = 750." },
+
+  { q: "f(x) = (9/5)(x − 273.15) + 32. The function F gives the temperature, in degrees Fahrenheit, that corresponds to a temperature of x kelvins. If a temperature increased by 25.10 kelvins, by how much did the temperature increase, in degrees Fahrenheit?",
+    type: "num", answer: "45.18",
+    explanation: "The change in Fahrenheit is the slope times the change in kelvins: (9/5)(25.10) = 45.18 degrees Fahrenheit." },
+
+  { q: "The positive number a is 2,136% of the sum of the positive numbers b and c, and b is 89% of c. What percent of b is a?",
+    choices: ["4,536%", "2,400%", "40.37%", "22.25%"],
+    answer: 0,
+    explanation: "a = 21.36(b + c). Since b = 0.89c, c = b/0.89 ≈ 1.1236b, so b + c ≈ 2.1236b. Then a ≈ 21.36 × 2.1236b ≈ 45.36b, which is 4,536% of b." },
+
+  { q: "For x > 0, the function f is defined as follows: f(x) equals 93% less than the value of x. Which of the following could describe this function?",
+    choices: ["Decreasing exponential", "Decreasing linear", "Increasing exponential", "Increasing linear"],
+    answer: 3,
+    explanation: "93% less than x means f(x) = x − 0.93x = 0.07x. This is a linear function with a positive slope, so it is increasing linear." },
+
+  { q: "The perimeter of an equilateral triangle is 876 cm. The three vertices of the triangle lie on a circle. The diameter of the circle is w√3 cm. What is the value of w?",
+    type: "num", answer: "194.67",
+    explanation: "Each side is 876/3 = 292 cm. The circumradius of an equilateral triangle is s/√3, so the diameter is 2s/√3 = 584/√3 = (584√3)/3. Therefore w = 584/3 ≈ 194.67." },
+
+  { q: "In triangle ABC, the measure of angle A is 52° and AC = 35. In triangle PQR, the measure of angle P is 52° and PR = 105. Which additional piece of information is sufficient to prove that triangle ABC is similar to triangle PQR?",
+    choices: ["AB = 30 and PQ = 30.", "AB = 30 and QR = 90.", "The measures of angle B and angle R are 34° and 94°, respectively.", "The measures of angle B and angle Q are 52° and 34°, respectively."],
+    answer: 2,
+    explanation: "If angle B = 34° and angle R = 94°, then angle C = 180 − 52 − 34 = 94°, so angle C = angle R. With angle A = angle P = 52°, the triangles are similar by AA. The other choices do not establish a match of two angles." },
+
+  { q: "In the xy-plane, line k and line l are perpendicular and intersect at the point (2, 9). Line k is defined by y = mx + b, where m > 1. Which of the following points lies on line l?",
+    choices: ["(3, 9 − 1/m)", "(3, 9 + 1/m)", "(3, 9 − m)", "(3, 9 + m)"],
+    answer: 0,
+    explanation: "Line l is perpendicular to line k, so its slope is −1/m. It passes through (2, 9). At x = 3, y = 9 + (−1/m)(3 − 2) = 9 − 1/m." }
+];
+
+const state = QUESTIONS.map(() => ({ done: false, correct: false, picked: null }));
+const letters = ["A", "B", "C", "D"];
+
+function parseNum(s) {
+  s = String(s).trim().replace(/,/g, "");
+  if (s === "") return NaN;
+  if (s.includes("/")) {
+    const [a, b] = s.split("/").map(Number);
+    return b === 0 ? NaN : a / b;
+  }
+  return Number(s);
+}
+
+function isCorrectNum(input, answer) {
+  const v = parseNum(input), target = parseNum(answer);
+  return !isNaN(v) && Math.abs(v - target) <= 0.005;
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = QUESTIONS.map((item, i) => {
+    const st = state[i];
+    let body = `<p class="qtext">${escapeHtml(item.q)}</p>`;
+    if (item.type === "num") {
+      body += `<div class="answer-row">
+        <input type="text" id="in${i}" placeholder="Your answer" ${st.done ? "disabled" : ""} value="${st.picked !== null ? escapeAttr(st.picked) : ""}" onkeydown="if(event.key==='Enter') check(${i})">
+        <button class="primary" onclick="check(${i})" ${st.done ? "disabled" : ""}>Check</button>
+      </div>`;
+    } else {
+      body += `<div class="choices">` + item.choices.map((c, j) => {
+        let cls = "choice";
+        if (st.done) {
+          if (j === item.answer) cls += " correct";
+          else if (j === st.picked) cls += " wrong";
+        }
+        return `<button class="${cls}" ${st.done ? "disabled" : ""} onclick="pick(${i}, ${j})">${letters[j]}) ${escapeHtml(c)}</button>`;
+      }).join("") + `</div>`;
+    }
+    if (st.done) {
+      const msg = st.correct ? "Correct." : (item.type === "num" ? `Incorrect. The answer is ${escapeHtml(item.answer)}.` : `Incorrect. The answer is ${letters[item.answer]}.`);
+      body += `<div class="feedback ${st.correct ? "ok" : "bad"}"><strong>${msg}</strong><div class="explain">${escapeHtml(item.explanation)}</div></div>`;
+    }
+    return `<section class="card" id="q${i}"><h2>Question ${i + 1}</h2>${body}</section>`;
+  }).join("");
+  updateScore();
+}
+
+function pick(i, j) {
+  if (state[i].done) return;
+  state[i] = { done: true, correct: j === QUESTIONS[i].answer, picked: j };
+  render();
+}
+
+function check(i) {
+  if (state[i].done) return;
+  const val = document.getElementById("in" + i).value;
+  if (val.trim() === "") return;
+  state[i] = { done: true, correct: isCorrectNum(val, QUESTIONS[i].answer), picked: val };
+  render();
+}
+
+function updateScore() {
+  const answered = state.filter(s => s.done).length;
+  const correct = state.filter(s => s.done && s.correct).length;
+  document.getElementById("answered").textContent = `Answered: ${answered} / ${QUESTIONS.length}`;
+  document.getElementById("correct").textContent = `Correct: ${correct}`;
+  const fin = document.getElementById("final");
+  if (answered === QUESTIONS.length) {
+    fin.classList.remove("hidden");
+    document.getElementById("finalScore").textContent = `${correct} / ${QUESTIONS.length}`;
+    const pct = correct / QUESTIONS.length;
+    document.getElementById("finalMsg").textContent = pct >= 0.8 ? "Excellent work." : pct >= 0.5 ? "Good effort. Review the explanations for the questions you missed." : "Keep practicing. Read the explanations and try the missed questions again.";
+  } else {
+    fin.classList.add("hidden");
+  }
+}
+
+function resetAll() {
+  for (let i = 0; i < state.length; i++) state[i] = { done: false, correct: false, picked: null };
+  render();
+  window.scrollTo(0, 0);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function escapeAttr(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+render();
+</script>
+</body>
+</html>
